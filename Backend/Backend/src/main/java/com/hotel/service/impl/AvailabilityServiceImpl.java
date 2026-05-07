@@ -1,6 +1,7 @@
 package com.hotel.service.impl;
 
 import com.hotel.dto.AvailabilityResponseDTO;
+import com.hotel.dto.DailyAvailabilityDTO;
 import com.hotel.entity.Room;
 import com.hotel.entity.RoomCategory;
 import com.hotel.repository.RoomRepository;
@@ -38,7 +39,36 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                         .availableCount(entry.getValue().intValue())
                         .price(entry.getKey().getBasePrice())
                         .build())
-                .filter(dto -> guests == null || dto.getAvailableCount() > 0) // Basic filter for now
+                .filter(dto -> guests == null || dto.getAvailableCount() > 0)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DailyAvailabilityDTO> getAvailabilityCalendar(Long hotelId, LocalDate startDate, Integer days) {
+        List<DailyAvailabilityDTO> calendar = new java.util.ArrayList<>();
+        LocalDate currentDate = startDate != null ? startDate : LocalDate.now();
+        int duration = days != null ? days : 30;
+
+        for (int i = 0; i < duration; i++) {
+            LocalDate date = currentDate.plusDays(i);
+            // Search availability for a single night (checkIn = date, checkOut = date + 1)
+            List<AvailabilityResponseDTO> dayResults = searchAvailability(hotelId, date, date.plusDays(1), null);
+            
+            List<DailyAvailabilityDTO.CategoryAvailabilityDTO> categoryResults = dayResults.stream()
+                    .map(res -> DailyAvailabilityDTO.CategoryAvailabilityDTO.builder()
+                            .categoryId(res.getCategoryId())
+                            .categoryName(res.getCategoryName())
+                            .availableCount(res.getAvailableCount())
+                            .price(res.getPrice())
+                            .build())
+                    .collect(Collectors.toList());
+
+            calendar.add(DailyAvailabilityDTO.builder()
+                    .date(date)
+                    .categories(categoryResults)
+                    .build());
+        }
+        return calendar;
     }
 }

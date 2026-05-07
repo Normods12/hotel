@@ -27,4 +27,13 @@ public class AvailabilityController {
         List<AvailabilityResponseDTO> results = availabilityService.searchAvailability(hotelId, checkIn, checkOut, guests);
         return ResponseEntity.ok(results);
     }
+
+    @GetMapping("/hotel/{hotelId}")
+    public ResponseEntity<List<com.hotel.dto.DailyAvailabilityDTO>> getHotelAvailabilityCalendar(
+            @PathVariable Long hotelId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false, defaultValue = "30") Integer days) {
+        
+        return ResponseEntity.ok(availabilityService.getAvailabilityCalendar(hotelId, startDate, days));
+    }
 }
