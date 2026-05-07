@@ -5,6 +5,7 @@ import Login from "./pages/LoginPage";
 import Signup from "./pages/SignupPage";
 import DashBoard from "./pages/DashBoard";
 import AdminDashboard from "./pages/AdminDashboard"; 
+import HotelListPage from "./pages/HotelListPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Home() {
@@ -19,22 +20,14 @@ function Home() {
   );
 }
 
-function Hotels() {
-  return (
-    <div className="container mx-auto px-4 py-20">
-      <h1 className="text-3xl font-bold mb-6">Hotel Listings</h1>
-      <p className="text-gray-600">Coming soon in Phase 2...</p>
-    </div>
-  );
-}
-
 export default function App() {
   return (
     <BrowserRouter>
       <MainLayout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/hotels" element={<Hotels />} />
+          <Route path="/hotels" element={<HotelListPage />} />
+          <Route path="/hotels/:id" element={<div className="container mx-auto py-20 text-center text-2xl">Hotel Details Placeholder (Phase 4)</div>} />
           <Route path="/dashboard" element={<DashBoard />} />
 
           <Route 
