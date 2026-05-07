@@ -1,108 +1,124 @@
-import { useState } from "react";
-import { registerUser } from "../services/UserService";
-import { Container, Card, Form, Button, Toast } from "react-bootstrap";
+import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { Link, useNavigate } from 'react-router-dom';
+import { registerUser } from '../services/UserService';
+import toast from 'react-hot-toast';
 
-export default function Signup() {
+const SignupPage = () => {
+  const navigate = useNavigate();
 
-  const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: ""
+  const formik = useFormik({
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+    },
+    validationSchema: Yup.object({
+      firstName: Yup.string().required('First name is required'),
+      lastName: Yup.string().required('Last name is required'),
+      email: Yup.string().email('Invalid email address').required('Email is required'),
+      password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+    }),
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        await registerUser(values);
+        toast.success("Account created successfully! Please sign in.");
+        navigate('/login');
+      } catch (err) {
+        toast.error(err.message || "Registration failed. Please try again.");
+      } finally {
+        setSubmitting(false);
+      }
+    },
   });
 
-  const [toast, setToast] = useState({ show: false, msg: "", type: "success" });
-
-  const showToast = (msg, type = "success") => {
-    setToast({ show: true, msg, type });
-  };
-
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setUser((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-
-    try {
-      await registerUser(user);
-
-      showToast("Signup Successful", "success");
-
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1500);
-
-    } catch (err) {
-      showToast(err || "Signup Failed", "danger");
-    }
-  };
-
   return (
-    <Container className="d-flex justify-content-center mt-5">
-      <Card className="p-4 shadow" style={{ width: "400px" }}>
-        <h3 className="text-center mb-3">Signup</h3>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-4xl font-extrabold text-gray-900 tracking-tight">
+          Join the community
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Already have an account?{' '}
+          <Link to="/login" className="font-bold text-primary-600 hover:text-primary-500 transition-colors">
+            Sign in here
+          </Link>
+        </p>
+      </div>
 
-        <Form onSubmit={handleSignup}>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-10 px-4 shadow-xl shadow-gray-200/50 sm:rounded-3xl sm:px-10 border border-gray-100">
+          <form className="space-y-6" onSubmit={formik.handleSubmit}>
+            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">First Name</label>
+                <input
+                  type="text"
+                  {...formik.getFieldProps('firstName')}
+                  className={`w-full px-4 py-3 rounded-xl border ${formik.touched.firstName && formik.errors.firstName ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-primary-500'} outline-none transition-all placeholder-gray-300`}
+                  placeholder="John"
+                />
+              </div>
 
-          <Form.Control
-            className="mb-2"
-            placeholder="First Name"
-            name="firstName"
-            onChange={handleChange}
-            required
-          />
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
+                <input
+                  type="text"
+                  {...formik.getFieldProps('lastName')}
+                  className={`w-full px-4 py-3 rounded-xl border ${formik.touched.lastName && formik.errors.lastName ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-primary-500'} outline-none transition-all placeholder-gray-300`}
+                  placeholder="Doe"
+                />
+              </div>
+            </div>
 
-          <Form.Control
-            className="mb-2"
-            placeholder="Last Name"
-            name="lastName"
-            onChange={handleChange}
-          />
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Email address</label>
+              <input
+                type="email"
+                {...formik.getFieldProps('email')}
+                className={`w-full px-4 py-3 rounded-xl border ${formik.touched.email && formik.errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-primary-500'} outline-none transition-all placeholder-gray-300`}
+                placeholder="john@example.com"
+              />
+              {formik.touched.email && formik.errors.email && (
+                <p className="mt-2 text-xs text-red-500 font-medium">{formik.errors.email}</p>
+              )}
+            </div>
 
-          <Form.Control
-            className="mb-2"
-            placeholder="Email"
-            type="email"
-            name="email"
-            onChange={handleChange}
-            required
-          />
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                {...formik.getFieldProps('password')}
+                className={`w-full px-4 py-3 rounded-xl border ${formik.touched.password && formik.errors.password ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-primary-500'} outline-none transition-all placeholder-gray-300`}
+                placeholder="Minimum 6 characters"
+              />
+              {formik.touched.password && formik.errors.password && (
+                <p className="mt-2 text-xs text-red-500 font-medium">{formik.errors.password}</p>
+              )}
+            </div>
 
-          <Form.Control
-            className="mb-3"
-            placeholder="Password"
-            type="password"
-            name="password"
-            onChange={handleChange}
-            required
-          />
+            <div>
+              <button
+                type="submit"
+                disabled={formik.isSubmitting}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all active:scale-[0.98] disabled:opacity-50"
+              >
+                {formik.isSubmitting ? 'Creating account...' : 'Create Account'}
+              </button>
+            </div>
+          </form>
 
-          <Button type="submit" className="w-100">
-            Register
-          </Button>
-        </Form>
-      </Card>
-
-      {/* Toast */}
-      <Toast
-        show={toast.show}
-        onClose={() => setToast({ ...toast, show: false })}
-        delay={2000}
-        autohide
-        bg={toast.type}
-        style={{ position: "absolute", top: 20, right: 20 }}
-      >
-        <Toast.Body className="text-white">
-          {toast.msg}
-        </Toast.Body>
-      </Toast>
-    </Container>
+          <p className="mt-8 text-xs text-center text-gray-500">
+            By signing up, you agree to our{' '}
+            <a href="#" className="font-bold text-gray-700 hover:underline">Terms of Service</a> and{' '}
+            <a href="#" className="font-bold text-gray-700 hover:underline">Privacy Policy</a>.
+          </p>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default SignupPage;

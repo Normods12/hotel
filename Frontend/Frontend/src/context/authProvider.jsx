@@ -1,28 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthContext } from "./authContext";
-import { getUser, getRole, logout as logoutUtil } from "../utils/authUtil";
-import { getToken } from "../utils/tokenHelper.js";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [user, setUser] = useState(getUser());
-  const [role, setRole] = useState(getRole());
-  const [isAuthenticated, setIsAuthenticated] = useState(!!getToken());
+  useEffect(() => {
+    // Initial check on load
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
 
-  const login = () => {
-    const userData = getUser();
+    if (token && storedUser) {
+      try {
+        const decoded = jwtDecode(token);
+        // Check if token is expired
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          logout();
+        } else {
+          setUser(JSON.parse(storedUser));
+          setRole(decoded.role || JSON.parse(storedUser).role);
+          setIsAuthenticated(true);
+        }
+      } catch (e) {
+        logout();
+      }
+    }
+    setLoading(false);
+  }, []);
 
-    console.log("LOGIN USER DATA:", userData);
+  const login = (token) => {
+    try {
+      const decoded = jwtDecode(token);
+      const userData = {
+        email: decoded.sub,
+        role: decoded.role || 'CUSTOMER',
+        // In a real app, you might get more info or fetch profile
+      };
 
-    if (!userData) return;
-
-    setUser(userData);
-    setRole(userData.role);
-    setIsAuthenticated(true);
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      setUser(userData);
+      setRole(userData.role);
+      setIsAuthenticated(true);
+    } catch (e) {
+      console.error("Login failed during token decoding", e);
+    }
   };
 
   const logout = () => {
-    logoutUtil();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     setRole(null);
     setIsAuthenticated(false);
@@ -34,11 +66,12 @@ export const AuthProvider = ({ children }) => {
         user,
         role,
         isAuthenticated,
+        loading,
         login,
         logout
       }}
     >
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
