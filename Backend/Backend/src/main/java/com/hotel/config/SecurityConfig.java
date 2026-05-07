@@ -1,5 +1,5 @@
 
-package com.contacts.config;
+package com.hotel.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

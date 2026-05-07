@@ -1,7 +1,7 @@
-package com.contacts.controller;
+package com.hotel.controller;
 
-import com.contacts.entity.Users;
-import com.contacts.service.UserService;
+import com.hotel.entity.Users;
+import com.hotel.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;

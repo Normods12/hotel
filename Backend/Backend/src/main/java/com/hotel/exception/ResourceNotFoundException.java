@@ -1,4 +1,4 @@
-package com.contacts.exception;
+package com.hotel.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {

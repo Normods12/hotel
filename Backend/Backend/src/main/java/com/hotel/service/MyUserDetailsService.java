@@ -1,8 +1,8 @@
-package com.contacts.service;
+package com.hotel.service;
 
-import com.contacts.entity.UserPrincipal;
-import com.contacts.entity.Users;
-import com.contacts.repository.UserRepo;
+import com.hotel.entity.UserPrincipal;
+import com.hotel.entity.Users;
+import com.hotel.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.contacts.entity;
+package com.hotel.entity;
 
 import java.util.Collection;
 import java.util.Collections;

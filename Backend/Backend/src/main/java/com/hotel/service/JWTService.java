@@ -1,6 +1,6 @@
-package com.contacts.service;
+package com.hotel.service;
 
-import com.contacts.entity.Users;
+import com.hotel.entity.Users;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

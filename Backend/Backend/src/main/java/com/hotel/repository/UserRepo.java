@@ -1,11 +1,11 @@
-package com.contacts.repository;
+package com.hotel.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.contacts.entity.Users;
+import com.hotel.entity.Users;
 
 @Repository
 public interface UserRepo extends JpaRepository<Users,Integer> {

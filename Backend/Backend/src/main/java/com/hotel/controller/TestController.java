@@ -1,4 +1,4 @@
-package com.contacts.controller;
+package com.hotel.controller;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;

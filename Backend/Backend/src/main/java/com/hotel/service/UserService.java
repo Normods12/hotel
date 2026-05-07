@@ -1,8 +1,8 @@
-package com.contacts.service;
+package com.hotel.service;
 
-import com.contacts.entity.Users;
+import com.hotel.entity.Users;
 
-import com.contacts.repository.UserRepo;
+import com.hotel.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
