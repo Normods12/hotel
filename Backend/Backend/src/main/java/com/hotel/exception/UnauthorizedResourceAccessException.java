@@ -1,4 +1,4 @@
-package com.contacts.exception;
+package com.hotel.exception;
 
 public class UnauthorizedResourceAccessException extends RuntimeException {
     public UnauthorizedResourceAccessException(String message) {

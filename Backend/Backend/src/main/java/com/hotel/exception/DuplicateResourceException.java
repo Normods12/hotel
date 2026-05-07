@@ -1,4 +1,4 @@
-package com.contacts.exception;
+package com.hotel.exception;
 
 public class DuplicateResourceException extends RuntimeException {
     public DuplicateResourceException(String message) {

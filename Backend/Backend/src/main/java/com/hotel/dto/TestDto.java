@@ -1,4 +1,4 @@
-package com.contacts.dto;
+package com.hotel.dto;
 
 public class TestDto {
 

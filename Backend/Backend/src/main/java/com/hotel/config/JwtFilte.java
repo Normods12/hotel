@@ -1,7 +1,7 @@
-package com.contacts.config;
+package com.hotel.config;
 
-import com.contacts.service.JWTService;
-import com.contacts.service.MyUserDetailsService;
+import com.hotel.service.JWTService;
+import com.hotel.service.MyUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
