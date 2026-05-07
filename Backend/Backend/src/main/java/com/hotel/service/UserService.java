@@ -35,7 +35,8 @@ private JWTService jwtService;
 
         if (authentication.isAuthenticated()) {
             // ALWAYS fetch the real user from DB to get the true role
-            Users realUser = usersRepository.findByEmail(user.getEmail());
+            Users realUser = usersRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
             // Pass both username and role to the JWT Service
             return jwtService.generateToken(realUser.getEmail(), realUser.getRole());
