@@ -1,104 +1,154 @@
-import { useState } from "react";
-import { loginUser } from "../services/UserService";
-import { jwtDecode } from "jwt-decode";
-import { Container, Card, Form, Button, Toast } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import React, { useContext } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/authContext';
+import { loginUser } from '../services/UserService';
+import toast from 'react-hot-toast';
 
-export default function Login() {
+const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-  const [credentials, setCredentials] = useState({
-    email: "",
-    password: ""
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email('Invalid email address').required('Email is required'),
+      password: Yup.string().required('Password is required'),
+    }),
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const token = await loginUser(values);
+        
+        if (!token || token === "Fail") {
+          toast.error("Invalid email or password");
+          return;
+        }
+
+        login(token);
+        toast.success("Welcome back!");
+        navigate('/dashboard');
+      } catch (err) {
+        toast.error(err.message || "Login failed. Please try again.");
+      } finally {
+        setSubmitting(false);
+      }
+    },
   });
 
-  const [toast, setToast] = useState({ show: false, msg: "", type: "success" });
-
-  const showToast = (msg, type = "success") => {
-    setToast({ show: true, msg, type });
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    try {
-      const token = await loginUser(credentials);
-
-      if (!token || token === "Fail") {
-        showToast("Invalid Credentials", "danger");
-        return;
-      }
-
-      // Decode JWT (email + role)
-      const decoded = jwtDecode(token);
-
-      localStorage.setItem("token", token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          email: decoded.sub,
-          role: decoded.role
-        })
-      );
-
-      showToast("Login Successful ", "success");
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
-
-    } catch (err) {
-      showToast(err || "Login Failed", "danger"
-        
-      );
-    }
-  };
-
   return (
-    <Container className="d-flex justify-content-center mt-5">
-      <Card className="p-4 shadow" style={{ width: "400px" }}>
-        <h3 className="text-center mb-3">Login</h3>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-4xl font-extrabold text-gray-900 tracking-tight">
+          Sign in to your account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{' '}
+          <Link to="/signup" className="font-bold text-primary-600 hover:text-primary-500 transition-colors">
+            create a new account for free
+          </Link>
+        </p>
+      </div>
 
-        <Form onSubmit={handleLogin}>
-          <Form.Control
-            className="mb-2"
-            placeholder="Email"
-            type="email"
-            onChange={(e) =>
-              setCredentials({ ...credentials, email: e.target.value })
-            }
-            required
-          />
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-10 px-4 shadow-xl shadow-gray-200/50 sm:rounded-3xl sm:px-10 border border-gray-100">
+          <form className="space-y-6" onSubmit={formik.handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                {...formik.getFieldProps('email')}
+                className={`w-full px-4 py-3 rounded-xl border ${formik.touched.email && formik.errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-primary-500'} outline-none transition-all placeholder-gray-300`}
+                placeholder="you@example.com"
+              />
+              {formik.touched.email && formik.errors.email && (
+                <p className="mt-2 text-xs text-red-500 font-medium">{formik.errors.email}</p>
+              )}
+            </div>
 
-          <Form.Control
-            className="mb-3"
-            placeholder="Password"
-            type="password"
-            onChange={(e) =>
-              setCredentials({ ...credentials, password: e.target.value })
-            }
-            required
-          />
+            <div>
+              <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                {...formik.getFieldProps('password')}
+                className={`w-full px-4 py-3 rounded-xl border ${formik.touched.password && formik.errors.password ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-primary-500'} outline-none transition-all placeholder-gray-300`}
+                placeholder="••••••••"
+              />
+              {formik.touched.password && formik.errors.password && (
+                <p className="mt-2 text-xs text-red-500 font-medium">{formik.errors.password}</p>
+              )}
+            </div>
 
-          <Button type="submit" className="w-100">
-            Login
-          </Button>
-        </Form>
-      </Card>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 cursor-pointer">
+                  Remember me
+                </label>
+              </div>
 
-      {/* Toast */}
-      <Toast
-        show={toast.show}
-        onClose={() => setToast({ ...toast, show: false })}
-        delay={2000}
-        autohide
-        bg={toast.type}
-        style={{ position: "absolute", top: 20, right: 20 }}
-      >
-        <Toast.Body className="text-white">
-          {toast.msg}
-        </Toast.Body>
-      </Toast>
-    </Container>
+              <div className="text-sm">
+                <a href="#" className="font-bold text-primary-600 hover:text-primary-500 transition-colors">
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={formik.isSubmitting}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all active:scale-[0.98] disabled:opacity-50"
+              >
+                {formik.isSubmitting ? (
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  'Sign in'
+                )}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500 font-medium">Continue as guest?</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Link
+                to="/hotels"
+                className="w-full inline-flex justify-center py-3 px-4 border border-gray-200 rounded-xl shadow-sm bg-white text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all"
+              >
+                Browse Hotels
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default LoginPage;
