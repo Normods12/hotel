@@ -28,6 +28,7 @@ public class BookingServiceImpl implements BookingService {
     private final HotelRepository hotelRepository;
     private final RoomCategoryRepository roomCategoryRepository;
     private final BookingMapper bookingMapper;
+    private final com.hotel.service.EmailService emailService;
 
     @Override
     @Transactional
@@ -91,6 +92,9 @@ public class BookingServiceImpl implements BookingService {
             bookingRoomRepository.save(bookingRoom);
         }
 
+        // Trigger Async Email
+        emailService.sendBookingConfirmation(savedBooking);
+
         return BookingResponseDTO.builder()
                 .bookingReference(savedBooking.getBookingReference())
                 .totalAmount(savedBooking.getTotalAmount())
@@ -111,5 +115,32 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDetailResponseDTO> getUserBookings(Long userId) {
         List<Booking> bookings = bookingRepository.findByUserId(userId);
         return bookingMapper.toDetailResponseDTOList(bookings);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDTO cancelBooking(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + id));
+
+        if (booking.getStatus() == Booking.BookingStatus.CANCELLED) {
+            throw new IllegalStateException("Booking is already cancelled");
+        }
+
+        if (booking.getStatus() == Booking.BookingStatus.COMPLETED) {
+            throw new IllegalStateException("Completed bookings cannot be cancelled");
+        }
+
+        booking.setStatus(Booking.BookingStatus.CANCELLED);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // Trigger Async Email
+        emailService.sendBookingCancellation(savedBooking);
+
+        return BookingResponseDTO.builder()
+                .bookingReference(savedBooking.getBookingReference())
+                .totalAmount(savedBooking.getTotalAmount())
+                .status(savedBooking.getStatus().name())
+                .build();
     }
 }

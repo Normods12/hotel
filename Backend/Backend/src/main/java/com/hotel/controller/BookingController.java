@@ -44,4 +44,9 @@ public class BookingController {
     public ResponseEntity<List<com.hotel.dto.BookingDetailResponseDTO>> getUserBookings(@PathVariable Long userId) {
         return ResponseEntity.ok(bookingService.getUserBookings(userId));
     }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponseDTO> cancelBooking(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.cancelBooking(id));
+    }
 }

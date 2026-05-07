@@ -11,4 +11,7 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findByBookingReference(String reference);
     List<Booking> findByUserId(Long userId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT b.hotel.name, SUM(b.totalAmount) FROM Booking b WHERE b.status != 'CANCELLED' GROUP BY b.hotel.name")
+    List<Object[]> sumTotalAmountByHotel();
 }

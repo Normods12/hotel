@@ -6,8 +6,10 @@ import com.hotel.entity.Hotel;
 import com.hotel.exception.ResourceNotFoundException;
 import com.hotel.mapper.HotelMapper;
 import com.hotel.repository.HotelRepository;
+import com.hotel.repository.specification.HotelSpecification;
 import com.hotel.service.HotelService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +32,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<HotelResponseDTO> getAllActiveHotels() {
+    public List<HotelResponseDTO> getAllHotels() {
         List<Hotel> activeHotels = hotelRepository.findByIsActiveTrue();
         return hotelMapper.toResponseDTOList(activeHotels);
     }
@@ -41,5 +43,13 @@ public class HotelServiceImpl implements HotelService {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
         return hotelMapper.toResponseDTO(hotel);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HotelResponseDTO> advancedSearch(String city, Integer starRating, Double minPrice, Double maxPrice, String amenities) {
+        Specification<Hotel> spec = HotelSpecification.filterHotels(city, starRating, minPrice, maxPrice, amenities);
+        List<Hotel> results = hotelRepository.findAll(spec);
+        return hotelMapper.toResponseDTOList(results);
     }
 }
