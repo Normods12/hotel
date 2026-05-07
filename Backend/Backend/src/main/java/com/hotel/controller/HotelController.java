@@ -20,13 +20,24 @@ public class HotelController {
     private final HotelService hotelService;
 
     @GetMapping
-    public ResponseEntity<List<HotelResponseDTO>> getAllActiveHotels() {
-        return ResponseEntity.ok(hotelService.getAllActiveHotels());
+    public ResponseEntity<List<HotelResponseDTO>> getAllHotels() {
+        return ResponseEntity.ok(hotelService.getAllHotels());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<HotelResponseDTO> getHotelById(@PathVariable Long id) {
         return ResponseEntity.ok(hotelService.getHotelById(id));
+    }
+
+    @GetMapping("/search/advanced")
+    public ResponseEntity<List<HotelResponseDTO>> advancedSearch(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) Integer starRating,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String amenities) {
+        
+        return ResponseEntity.ok(hotelService.advancedSearch(city, starRating, minPrice, maxPrice, amenities));
     }
 
     @PostMapping

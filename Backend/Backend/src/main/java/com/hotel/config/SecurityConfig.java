@@ -49,8 +49,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())  
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login","/register")
-                        .permitAll()
+                        .requestMatchers("/login", "/register", "/api/hotels/**", "/api/room-categories/**", "/api/availability/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
 

@@ -10,7 +10,7 @@ import com.hotel.entity.Users;
 @Repository
 public interface UserRepo extends JpaRepository<Users,Integer> {
 
-    Users findByEmail(String username);
+    Optional<Users> findByEmail(String username);
     
     Optional<Users> findById(Long id);
 

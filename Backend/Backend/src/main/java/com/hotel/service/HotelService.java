@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface HotelService {
     HotelResponseDTO createHotel(HotelRequestDTO hotelRequestDTO);
-    List<HotelResponseDTO> getAllActiveHotels();
+    List<HotelResponseDTO> getAllHotels();
     HotelResponseDTO getHotelById(Long id);
+    List<HotelResponseDTO> advancedSearch(String city, Integer starRating, Double minPrice, Double maxPrice, String amenities);
 }
